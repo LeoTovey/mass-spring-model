@@ -22,6 +22,7 @@
 		<div id="container"></div>
 
 		<div id="info">
+			<a id="progress">0.0%</a>
 			Model: <a href="https://www.artstation.com/artwork/1AGwX" target="_blank" rel="noopener">Littlest Tokyo</a> by
 			<a href="https://www.artstation.com/glenatron" target="_blank" rel="noopener">Glen Fox</a>, CC Attribution.
 		</div>
@@ -72,7 +73,9 @@
 
 			const loader = new GLTFLoader();
 			loader.setDRACOLoader( dracoLoader );
-			loader.load( 'city.glb', function ( gltf ) {
+			loader.load( 
+				'city.glb', 
+				function ( gltf ) {
 
 				const model = gltf.scene;
 				model.position.set( 1, 1, 0 );
@@ -83,8 +86,14 @@
 				mixer.clipAction( gltf.animations[ 0 ] ).play();
 
 				animate();
-
-			}, undefined, function ( e ) {
+			}, 	
+			
+			// onProgress callback
+			function ( xhr ) {
+				document.getElementById("progress").innerHTML = (xhr.loaded / xhr.total * 100) + '% loaded';
+			},
+			function ( e ) 
+			{
 
 				console.error( e );
 
