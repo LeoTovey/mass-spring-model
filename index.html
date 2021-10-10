@@ -73,7 +73,7 @@
 
 			const loader = new GLTFLoader();
 			loader.setDRACOLoader( dracoLoader );
-			loader.load( 'models/city.glb', function ( gltf ) {
+			loader.load( './models/city.glb', function ( gltf ) {
 
 				const model = gltf.scene;
 				model.position.set( 1, 1, 0 );
