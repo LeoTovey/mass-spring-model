@@ -17,7 +17,7 @@ export default class MassSpringSystem
 
         this.maxNumParticle = 100
         this.particleMass = 1.0
-        this.dt = 1e-3
+        this.dt = 1e-1
         this.subSteps = 10
         this.connectionRadius = 0.15
 
@@ -45,11 +45,59 @@ export default class MassSpringSystem
         this.x[id] = new THREE.Vector2(pos.x, pos.y)
         this.v[id] = new THREE.Vector2(0, 0)
         this.numParticles++
+    }
 
-        for (let i = 0; i < id; i++) {
+    updateSteps(particles)
+    {
+        var id = this.numParticles
 
-            var dist = this.x[id].distaNC
-            
+        // computer force
+        for( let i = 0; i < id; i++)
+        {
+            let g = new THREE.Vector2(0.0, -9.8);
+            this.f[i] = g.multiplyScalar(this.particleMass);
+        }
+
+        var maxX = 5;
+        var maxY = 5;
+        var minX = -5;
+        var minY = -5;
+        
+        for( let i = 0; i < id; i++)
+        {
+            // collide with four walls
+            if(this.x[i].x > maxX)
+            {
+                this.x[i].x = maxX;
+                this.v[i].x = 0;
+            }
+
+            if(this.x[i].y > maxY)
+            {
+                this.x[i].y = maxY;
+                this.v[i].y = 0;
+            }
+
+            if(this.x[i].x < minX)
+            {
+                this.x[i].x = minX;
+                this.v[i].x = 0;
+            }
+
+            if(this.x[i].y < minY)
+            {
+                this.x[i].y = minY;
+                this.v[i].y = 0;
+            }
+
+            //this.x[i]. ++;
+            // computer velocity and position
+            var a_dt = this.f[i].divideScalar(this.particleMass).multiplyScalar(this.dt)
+            this.v[i] = this.v[i].add(this.v[i].add(a_dt));
+
+            this.x[i] = this.x[i].add(this.v[i].multiplyScalar(this.dt));
+
+            particles[i].position.set(this.x[i].x, this.x[i].y, 0);
         }
     }
 
