@@ -33,6 +33,7 @@
 
 			import Stats from './three/examples/jsm/libs/stats.module.js';
 
+			import MassSpringSystem from './MassSpringSystem.js'
 			import { OrbitControls } from './three/examples/jsm/controls/OrbitControls.js';
 			import { RoomEnvironment } from './three/examples/jsm/environments/RoomEnvironment.js';
 
@@ -45,6 +46,8 @@
 			const container = document.getElementById( 'container' );
 
 			const stats = new Stats();
+			const massSystem = new MassSpringSystem()
+			document.addEventListener('click', add);
 			container.appendChild( stats.dom );
 
 			const renderer = new THREE.WebGLRenderer( { antialias: true } );
@@ -112,6 +115,7 @@
 
 			function animate() {
 
+
 				requestAnimationFrame( animate );
 
 				const delta = clock.getDelta();
@@ -126,7 +130,13 @@
 
 			}
 
-
+			function add(event) {
+				var pos = new THREE.Vector2();
+				pos.x = event.clientX / window.innerWidth
+				pos.y = 1.0 - event.clientY / window.innerHeight
+				massSystem.addParticle(pos, false)
+			}
+			
 		</script>
 
 	</body>
