@@ -1,12 +1,10 @@
 
 import * as THREE from './three/build/three.module.js';
-
+import Particle from './Particle.js';
+import Spring from './Spring.js';
 export default class MassSpringSystem
 {
     static instance
-
-    
-
 
     constructor()
     {
@@ -19,85 +17,112 @@ export default class MassSpringSystem
         this.particleMass = 1.0
         this.dt = 1e-1
         this.subSteps = 10
-        this.connectionRadius = 0.15
+        this.connectionRadius = 75
 
         this.numParticles = 0
-        this.x = new Array(this.maxNumParticle)
-        this.v = new Array(this.maxNumParticle)
-        this.f = new Array(this.maxNumParticle)
-        this.restLength = new Array(this.maxNumParticle)
 
+        this.maxX = 0;
+        this.maxY = 0;
+        this.minX = 0;
+        this.minY = 0;
+
+        this.particles = new Array(this.maxNumParticle);
+        this.restLength = new Array(this.maxNumParticle);
+        this.springs = new Array();
+        
         for(var i = 0; i < this.maxNumParticle; i++) 
         {
             this.restLength[i] = new Array(this.maxNumParticle)
         }
-    
-
     }
 
-    addParticle(pos, fixed)
+    addParticle(scene, pos, fixed)
     {
-        if (this.numParticles == this.maxNumParticle) {
+        if (this.numParticles == this.maxNumParticle) 
+        {
             return;
         }
 
         var id = this.numParticles
-        this.x[id] = new THREE.Vector2(pos.x, pos.y)
-        this.v[id] = new THREE.Vector2(0, 0)
+        this.particles[id] = new Particle(pos, fixed);
+        for(let i = 0; i < id; i++)
+        {
+            let postion = new THREE.Vector2(); 
+            postion.x = this.particles[i].position.x;
+            postion.y = this.particles[i].position.y;
+            postion = postion.sub(pos);
+            //console.log(postion.length());
+            if(postion.length() < this.connectionRadius)
+            {
+                console.log('add spring');
+                this.springs.push(new Spring(scene, this.particles[id], this.particles[i]));
+            }
+        }
+        scene.add(this.particles[id].mesh);
         this.numParticles++
     }
 
-    updateSteps(particles)
+    update()
     {
         var id = this.numParticles
 
         // computer force
         for( let i = 0; i < id; i++)
         {
-            let g = new THREE.Vector2(0.0, -9.8);
-            this.f[i] = g.multiplyScalar(this.particleMass);
+            let g = new THREE.Vector2(0.0, -2.8);
+            this.particles[i].force = g.multiplyScalar(this.particleMass);
         }
 
-        var maxX = 5;
-        var maxY = 5;
-        var minX = -5;
-        var minY = -5;
         
         for( let i = 0; i < id; i++)
         {
-            // collide with four walls
-            if(this.x[i].x > maxX)
+            let particle = this.particles[i];
+            let radius = 50;
+            
+            //collide with four walls
+            if(particle.position.x > (this.maxX - radius))
             {
-                this.x[i].x = maxX;
-                this.v[i].x = 0;
+                particle.position.x = this.maxX;
+                particle.velocity.x = 0;
             }
 
-            if(this.x[i].y > maxY)
+            if(particle.position.y > (this.maxY - radius))
             {
-                this.x[i].y = maxY;
-                this.v[i].y = 0;
+                particle.position.y = this.maxY;
+                particle.velocity.y = 0;
             }
 
-            if(this.x[i].x < minX)
+            if(particle.position.x < (this.minX + radius))
             {
-                this.x[i].x = minX;
-                this.v[i].x = 0;
+                particle.position.x = this.minX + radius;
+                particle.velocity.x = 0;
             }
 
-            if(this.x[i].y < minY)
+            if(particle.position.y < (this.minY + radius))
             {
-                this.x[i].y = minY;
-                this.v[i].y = 0;
+                particle.position.y = this.minY + radius;
+                particle.velocity.y = 0;
             }
 
-            //this.x[i]. ++;
-            // computer velocity and position
-            var a_dt = this.f[i].divideScalar(this.particleMass).multiplyScalar(this.dt)
-            this.v[i] = this.v[i].add(this.v[i].add(a_dt));
+            //computer velocity and position
 
-            this.x[i] = this.x[i].add(this.v[i].multiplyScalar(this.dt));
+            let force = new THREE.Vector2();
+            let velocity = new THREE.Vector2();
 
-            particles[i].position.set(this.x[i].x, this.x[i].y, 0);
+            force.copy(particle.force);
+
+            let a = force.divideScalar(this.particleMass);
+            let at = a.multiplyScalar(this.dt);
+            particle.velocity.add(at);
+            velocity.copy(particle.velocity);
+
+            particle.position.add(velocity.multiplyScalar(this.dt));
+  
+            particle.updateMeshPosition();
+            for (let index = 0; index < this.springs.length; index++) {
+                const element = this.springs[index];
+                element.update();
+            }
         }
     }
 
