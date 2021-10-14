@@ -82,16 +82,6 @@ export default class MassSpringSystem
             let g = new THREE.Vector2(0.0, -2.8);
             thisParticle.force = g.multiplyScalar(this.particleMass);
 
-            // Vector2f x_ij = m_x[i] - m_x[j];
-            // Vector2f d = x_ij.Normalized();
-
-            // // spring force
-            // m_f[i] += -m_springY * (x_ij.Length() / m_restLength[i][j] - 1.0f) * d;
-
-            // // dashpot damping
-            // //todo: add dashpot damping
-            // float v_rel = Dot((m_v[i] - m_v[j]), d);
-            // m_f[i] += - m_dashPotDamping * v_rel * d;
             for( let j = 0; j < id; j++)
             {
                 let anotherParticle = this.particles[j];
