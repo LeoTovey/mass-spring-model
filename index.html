@@ -30,8 +30,11 @@
 		import Stats from './three/examples/jsm/libs/stats.module.js';
 
 		import { OrbitControls } from './three/examples/jsm/controls/OrbitControls.js';
+		import { GLTFLoader } from './three/examples/jsm/loaders/GLTFLoader.js';
+		import { DRACOLoader } from './three/examples/jsm/loaders/DRACOLoader.js';
 		import Particle from './Particle.js';
 		import MassSpringSystem from './MassSpringSystem.js';
+		import { GUI } from './three/examples/jsm/libs/dat.gui.module.js';
 		let camera, scene, renderer;
 
 		const frustumSize = 500;
@@ -60,6 +63,22 @@
 		massSystem.minY = frustumSize / - 2;
 
 		document.addEventListener('mousedown', click);
+		document.addEventListener('touchstart', click);
+
+		// const dracoLoader = new DRACOLoader();
+		// dracoLoader.setDecoderPath('/three/examples/js/libs/draco/gltf/');
+
+		// const loader = new GLTFLoader();
+		// loader.setDRACOLoader(dracoLoader);
+
+		let tips = {
+			add : 'Right-click to add particle',
+			fix : 'Right-click with shift to fix'};
+		let gui = new GUI();
+		gui.add(tips, 'add').name('');
+		gui.add(tips, 'fix').name('');
+		gui.add(massSystem, 'springY').min(0).max(1000).step(10);
+		gui.add(massSystem, 'dashPotDamping').min(0).max(1).step(0.01);
 
 		animate();
 		
@@ -82,7 +101,7 @@
 			renderer.setSize(window.innerWidth, window.innerHeight);
 		}
 
-		function animate() {
+		function animate(time) {
 
 			requestAnimationFrame(animate);
 
@@ -99,11 +118,12 @@
 
 			if (event.button == 2) {
 
+				console.log(event);
 
 				mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
 				mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
 
-				massSystem.addParticle(scene, new THREE.Vector2(mouse.x * frustumSize * aspect * 0.5, mouse.y * frustumSize * 0.5), false)
+				massSystem.addParticle(scene, new THREE.Vector2(mouse.x * frustumSize * aspect * 0.5, mouse.y * frustumSize * 0.5), event.shiftKey)
 			}
 		}
 	</script>

@@ -17,6 +17,7 @@ export default class Spring
         this.particle2 = particle2;
         let pos1 = particle1.position;
         let pos2 = particle2.position;
+        this.restLength = restLength;
         const mesh = new THREE.Mesh( geometry, material );
 
         let pos = new THREE.Vector2();
@@ -24,6 +25,11 @@ export default class Spring
         pos.add(pos2);
         pos.multiplyScalar(0.5);
         mesh.position.set(pos.x, pos.y, -1);
+
+        pos.copy(pos1);
+        pos.sub(pos2);
+        this.length = pos.length();
+
         mesh.rotateZ(this.calculateZ());
         this.mesh = mesh;
 
@@ -41,6 +47,7 @@ export default class Spring
         this.mesh.position.set(pos.x, pos.y, -1);
         pos.copy(pos1);
         pos.sub(pos2);
+        this.length = pos.length();
         this.mesh.scale.y = pos.length()/ restLength;
         this.mesh.rotation.z = this.calculateZ();
     }

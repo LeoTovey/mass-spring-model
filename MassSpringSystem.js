@@ -9,9 +9,9 @@ export default class MassSpringSystem
     constructor()
     {
         MassSpringSystem.instance = this
-        this.springY = 1000
-        this.dashPotDamping = 100
-        this.dragDamping = 1
+        this.springY = 100
+        this.dashPotDamping = 1
+        //this.dragDamping = 1
 
         this.maxNumParticle = 100
         this.particleMass = 1.0
@@ -27,12 +27,15 @@ export default class MassSpringSystem
         this.minY = 0;
 
         this.particles = new Array(this.maxNumParticle);
-        this.restLength = new Array(this.maxNumParticle);
-        this.springs = new Array();
+        this.springs = new Array(this.maxNumParticle);
         
-        for(var i = 0; i < this.maxNumParticle; i++) 
+        for(let i = 0; i < this.maxNumParticle; i++) 
         {
-            this.restLength[i] = new Array(this.maxNumParticle)
+            this.springs[i] = new Array(this.maxNumParticle)
+            for (let j = 0; j < this.maxNumParticle; j++) 
+            {
+                this.springs[i][j] = null;
+            }
         }
     }
 
@@ -55,7 +58,9 @@ export default class MassSpringSystem
             if(postion.length() < this.connectionRadius)
             {
                 //console.log('add spring');
-                this.springs.push(new Spring(scene, this.particles[id], this.particles[i]));
+                let spring = new Spring(scene, this.particles[id], this.particles[i]);
+                this.springs[i][id] = spring;
+                this.springs[id][i] = spring;
             }
         }
         scene.add(this.particles[id].mesh);
@@ -69,8 +74,56 @@ export default class MassSpringSystem
         // computer force
         for( let i = 0; i < id; i++)
         {
+            let thisParticle = this.particles[i];
+            if(thisParticle.fixed)
+            {
+                continue;
+            }
             let g = new THREE.Vector2(0.0, -2.8);
-            this.particles[i].force = g.multiplyScalar(this.particleMass);
+            thisParticle.force = g.multiplyScalar(this.particleMass);
+
+            // Vector2f x_ij = m_x[i] - m_x[j];
+            // Vector2f d = x_ij.Normalized();
+
+            // // spring force
+            // m_f[i] += -m_springY * (x_ij.Length() / m_restLength[i][j] - 1.0f) * d;
+
+            // // dashpot damping
+            // //todo: add dashpot damping
+            // float v_rel = Dot((m_v[i] - m_v[j]), d);
+            // m_f[i] += - m_dashPotDamping * v_rel * d;
+            for( let j = 0; j < id; j++)
+            {
+                let anotherParticle = this.particles[j];
+                let spring = this.springs[i][j];
+                if(spring)
+                {
+                    let x_ij = new THREE.Vector2();
+                    x_ij.copy(thisParticle.position);
+                    x_ij.sub(anotherParticle.position);
+
+                    let n = new THREE.Vector2();
+                    n.copy(x_ij);
+                    n.normalize();
+
+                    //spring force
+                    let springForce = new THREE.Vector2();
+                    springForce.copy(n);
+                    let k = -this.springY * (spring.length / spring.restLength - 1.0);
+                    springForce.multiplyScalar(k);                 
+                    thisParticle.force.add(springForce);
+
+                    //dashpot damping
+                    let v_ij = new THREE.Vector2();
+                    v_ij.copy(thisParticle.velocity);
+                    v_ij.sub(anotherParticle.velocity);
+                    let v_rel = v_ij.dot(n);
+                    let force = new THREE.Vector2();
+                    force.copy(n);
+                    force.multiplyScalar(- this.dashPotDamping * v_rel);
+                    thisParticle.force.add(force);
+                }
+            }
         }
 
         
@@ -119,10 +172,21 @@ export default class MassSpringSystem
             particle.position.add(velocity.multiplyScalar(this.dt));
   
             particle.updateMeshPosition();
-            for (let index = 0; index < this.springs.length; index++) {
-                const element = this.springs[index];
-                element.update();
+        }
+
+
+        // update springs postion
+        for (let i = 0; i < this.maxNumParticle; i++) 
+        {
+            for (let j = i+1; j < this.maxNumParticle; j++) 
+            {
+                let spring = this.springs[i][j];
+                if(spring)
+                {
+                    spring.update();
+                }
             }
+            
         }
     }
 
