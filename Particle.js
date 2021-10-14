@@ -2,7 +2,7 @@ import * as THREE from './three/build/three.module.js';
 
 const radius = 5;
 const particleGeometry = new THREE.CircleGeometry( radius, 32 );
-const particleMaterial = new THREE.MeshBasicMaterial({ color: 0x44aa88 });  // greenish blue
+const particleMaterial = new THREE.MeshBasicMaterial({ color: 0xff8da3 });  // greenish blue
 
 
 export default class Particle

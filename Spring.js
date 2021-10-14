@@ -1,9 +1,12 @@
 import * as THREE from './three/build/three.module.js';
 
-const material = new THREE.LineBasicMaterial({
-	color: 0x0000ff,
-    linewidth: 100
-});
+
+const springRadius = 3;
+const restLength = 100;
+
+const geometry = new THREE.PlaneGeometry( springRadius, restLength );
+const material = new THREE.MeshBasicMaterial( {color: 0xffd7cf, side: THREE.DoubleSide} );
+
 
 export default class Spring
 {
@@ -14,27 +17,51 @@ export default class Spring
         this.particle2 = particle2;
         let pos1 = particle1.position;
         let pos2 = particle2.position;
-        const points =  new Float32Array( [
-            pos1.x, pos1.y, -1,
-            pos2.x, pos2.y, -1
-        ] );
+        const mesh = new THREE.Mesh( geometry, material );
 
-        const geometry = new THREE.BufferGeometry();
-        geometry.setAttribute( 'position', new THREE.BufferAttribute( points, 3 ) );
-        this.geometry = geometry;
+        let pos = new THREE.Vector2();
+        pos.copy(pos1);
+        pos.add(pos2);
+        pos.multiplyScalar(0.5);
+        mesh.position.set(pos.x, pos.y, -1);
+        mesh.rotateZ(this.calculateZ());
+        this.mesh = mesh;
 
-        const line = new THREE.Line( geometry, material );
-        scene.add(line);
+        scene.add(mesh);
     }
 
     update()
     {
         let pos1 = this.particle1.position;
         let pos2 = this.particle2.position;
-        const points =  new Float32Array( [
-            pos1.x, pos1.y, -1,
-            pos2.x, pos2.y, -1
-        ] );
-        this.geometry.setAttribute('position', new THREE.BufferAttribute(points, 3 ) );
+        let pos = new THREE.Vector2();
+        pos.copy(pos1);
+        pos.add(pos2);
+        pos.multiplyScalar(0.5);
+        this.mesh.position.set(pos.x, pos.y, -1);
+        pos.copy(pos1);
+        pos.sub(pos2);
+        this.mesh.scale.y = pos.length()/ restLength;
+        this.mesh.rotation.z = this.calculateZ();
+    }
+
+
+    calculateZ()
+    {
+        let pos1 = this.particle1.position;
+        let pos2 = this.particle2.position;
+
+        if(pos1.x == pos2.x)
+        {
+            return 0;
+        }
+        else
+        {
+            let k = (pos1.y - pos2.y) / (pos1.x - pos2.x);
+            let theta = Math.atan(k);
+            //console.log(theta * 180.0 / Math.PI);
+            return theta - Math.PI / 2;
+        }
+
     }
 }

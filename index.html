@@ -2,10 +2,11 @@
 <html lang="en">
 
 <head>
-	<title>three.js demo</title>
+	<title>Mass-Spring System Demo</title>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 	<link type="text/css" rel="stylesheet" href="main.css">
+	<link rel="shortcut icon" href="favicon.ico">
 	<style>
 		body {
 			background-color: #bfe3dd;
@@ -26,6 +27,7 @@
 
 
 		import * as THREE from './three/build/three.module.js';
+		import Stats from './three/examples/jsm/libs/stats.module.js';
 
 		import { OrbitControls } from './three/examples/jsm/controls/OrbitControls.js';
 		import Particle from './Particle.js';
@@ -34,19 +36,21 @@
 
 		const frustumSize = 500;
 
-
 		let aspect = window.innerWidth / window.innerHeight;
 		camera = new THREE.OrthographicCamera(frustumSize * aspect / - 2, frustumSize * aspect / 2, frustumSize / 2, frustumSize / - 2, 1, 1000);
 
 		camera.position.set(0, 0, 200);
 
 		scene = new THREE.Scene();
-		scene.background = new THREE.Color(0xf0f0f0);
+		const stats = new Stats();
+		scene.background = new THREE.Color(0xfff8ec);
 
 		renderer = new THREE.WebGLRenderer();
 		renderer.setPixelRatio(window.devicePixelRatio);
 		renderer.setSize(window.innerWidth, window.innerHeight);
 		document.body.appendChild(renderer.domElement);
+		const container = document.getElementById('container');
+		container.appendChild(stats.dom);
 
 		window.addEventListener('resize', onWindowResize);
 		const massSystem = new MassSpringSystem()
@@ -84,6 +88,7 @@
 
 			//console.log(window.innerWidth)
 			massSystem.update();
+			stats.update();
 			renderer.render(scene, camera);
 
 		}

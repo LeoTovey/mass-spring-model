@@ -54,7 +54,7 @@ export default class MassSpringSystem
             //console.log(postion.length());
             if(postion.length() < this.connectionRadius)
             {
-                console.log('add spring');
+                //console.log('add spring');
                 this.springs.push(new Spring(scene, this.particles[id], this.particles[i]));
             }
         }
@@ -128,6 +128,6 @@ export default class MassSpringSystem
 
     draw()
     {
-        console.warn(this.springY)
+        //console.warn(this.springY)
     }
 }
