@@ -36,8 +36,7 @@ massSystem.maxY = frustumSize / 2;
 massSystem.minY = frustumSize / - 2;
 
 document.addEventListener('mousedown', click);
-document.addEventListener('touchstart', click);
-document.addEventListener("touchstart", click, false);
+document.addEventListener('touchstart', click, false);
 
 // const dracoLoader = new DRACOLoader();
 // dracoLoader.setDecoderPath('/three/examples/js/libs/draco/gltf/');
@@ -89,18 +88,7 @@ function animate(time) {
 
 const mouse = new THREE.Vector2();
 
-function click(event) {
-
-
-
-	for ( let i = 0; i < intersects.length; i ++ ) {
-
-		intersects[ i ].object.material.color.set( 0xff0000 );
-
-	}
-
-	renderer.render( scene, camera );
-    
+function click(event) {    
     if (event.button == 2) {
 
         console.log(event);
