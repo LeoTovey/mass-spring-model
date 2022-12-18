@@ -36,7 +36,7 @@ massSystem.maxY = frustumSize / 2;
 massSystem.minY = frustumSize / - 2;
 
 document.addEventListener('mousedown', click);
-document.addEventListener('touchstart', click, false);
+document.addEventListener('touchstart', touch, false);
 
 // const dracoLoader = new DRACOLoader();
 // dracoLoader.setDecoderPath('/three/examples/js/libs/draco/gltf/');
@@ -88,6 +88,16 @@ function animate(time) {
 
 const mouse = new THREE.Vector2();
 
+function touch(event)
+{
+    console.log("touch")
+    var touch = event.targetTouches[0]; //touches数组对象获得屏幕上所有的touch，取第一个touch
+    mouse.x = (touch.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = - (touch.clientY / window.innerHeight) * 2 + 1;
+
+    massSystem.addParticle(scene, new THREE.Vector2(mouse.x * frustumSize * aspect * 0.5, mouse.y * frustumSize * 0.5), event.shiftKey)
+
+}
 function click(event) {    
     if (event.button == 2) {
 
